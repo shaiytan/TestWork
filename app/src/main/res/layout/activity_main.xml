@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="shaiytan.ssatrloader.MainActivity">
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/sortclick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sort by name"/>
+    <android.support.v7.widget.ListViewCompat
+        android:id="@+id/reposlist"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/loadclick"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/load_more" />
+</android.support.v7.widget.LinearLayoutCompat>
