@@ -11,13 +11,14 @@ import java.io.Serializable;
 public class RepoRecord implements Serializable,Comparable<RepoRecord>{
     private long id;
     private String name;
-    private String owner_name;
+    private String ownerName;
     private String description;
     private String avatar;
-    public RepoRecord(long id, String name, String owner_name, String description, String avatar) {
+
+    public RepoRecord(long id, String name, String ownerName, String description, String avatar) {
         this.id = id;
         this.name = name;
-        this.owner_name = owner_name;
+        this.ownerName = ownerName;
         this.description = description;
         this.avatar = avatar;
     }
@@ -29,7 +30,7 @@ public class RepoRecord implements Serializable,Comparable<RepoRecord>{
         return name;
     }
     public String getOwnerName() {
-        return owner_name;
+        return ownerName;
     }
     public String getAvatar() {
         return avatar;
