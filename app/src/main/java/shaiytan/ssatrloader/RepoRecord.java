@@ -1,14 +1,12 @@
 package shaiytan.ssatrloader;
 
-import android.support.annotation.NonNull;
-
 import java.io.Serializable;
 
 /**
  * Created by Shaiytan on 17.05.2017.
  */
 
-public class RepoRecord implements Serializable,Comparable<RepoRecord>{
+public class RepoRecord implements Serializable {
     private long id;
     private String name;
     private String ownerName;
@@ -39,8 +37,4 @@ public class RepoRecord implements Serializable,Comparable<RepoRecord>{
         return description;
     }
 
-    @Override
-    public int compareTo(@NonNull RepoRecord o) {
-        return name.compareToIgnoreCase(o.name);
-    }
 }

@@ -1,86 +1,75 @@
 package shaiytan.ssatrloader;
 
 
-import android.os.AsyncTask;
 
 import com.google.gson.*;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
 import java.util.*;
+
+import retrofit2.*;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Shaiytan on 17.05.2017.
  */
 
 public class ReposModel {
-    private ArrayList<RepoRecord> data;
-    private String address="https://api.github.com/repositories";
+    private ArrayList<RepoRecord> data = new ArrayList<>();
+    private String address = "https://api.github.com/repositories";
+    private GitHubAPI api;
+
     public ReposModel() {
-        data=new ArrayList<>();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(RepoRecord.class, (JsonDeserializer<RepoRecord>) (json, typeOfT, context) -> {
+                    JsonObject rec = json.getAsJsonObject();
+                    long id = rec.get("id").getAsLong();
+                    JsonElement cur = rec.get("name");
+                    String name = cur.isJsonNull() ? "" : cur.getAsString();
+                    JsonObject owner = rec.get("owner").getAsJsonObject();
+                    cur = owner.get("login");
+                    String owner_name = cur.isJsonNull() ? "" : cur.getAsString();
+                    cur = owner.get("avatar_url");
+                    String avatar = cur.isJsonNull() ? "" : cur.getAsString();
+                    cur = rec.get("description");
+                    String description = cur.isJsonNull() ? "" : cur.getAsString();
+                    return new RepoRecord(id, name, owner_name, description, avatar);
+                }).create();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(address + "/")
+                .addConverterFactory(GsonConverterFactory.create(gson))
+                .build();
+        api = retrofit.create(GitHubAPI.class);
     }
-    private void load() {
-        AsyncTask<Void,Void,ArrayList<RepoRecord>> request=new AsyncTask<Void, Void, ArrayList<RepoRecord>>() {
+
+    public void getNextList(OnLoadListener listenter) {
+        api.getRepos(address).enqueue(new Callback<ArrayList<RepoRecord>>() {
             @Override
-            protected ArrayList<RepoRecord> doInBackground(Void... params) {
-                ArrayList<RepoRecord> records = new ArrayList<>();
-                try {
-                    URL github = new URL(address);
-                    HttpURLConnection connection = (HttpURLConnection) github.openConnection();
-                    connection.connect();
-
-                    Map<String, List<String>> resphead = connection.getHeaderFields();
-                    String nextpage=resphead.get("Link").get(0);
-                    nextpage=nextpage.substring(nextpage.indexOf("<") + 1, nextpage.indexOf(">"));
+            public void onResponse(Call<ArrayList<RepoRecord>> call, Response<ArrayList<RepoRecord>> response) {
+                String nextpage = response.headers().get("Link");
+                if (nextpage != null) {
+                    nextpage = nextpage.substring(nextpage.indexOf("<") + 1, nextpage.indexOf(">"));
                     address = nextpage;
-
-                    InputStreamReader in = new InputStreamReader(connection.getInputStream());
-                    JsonParser parser=new JsonParser();
-                    JsonElement root = parser.parse(in);
-                    connection.disconnect();
-
-                    parseJson(records, root);
-
-                } catch (Exception e) {
-                    records.clear();
                 }
-                return records;
+                data = response.body();
+                listenter.onLoad(data);
             }
-        };
-        try {
-            ArrayList<RepoRecord> response = request.execute().get();
-            if(!response.isEmpty()) {
-                data=response;
+
+            @Override
+            public void onFailure(Call<ArrayList<RepoRecord>> call, Throwable t) {
+                t.printStackTrace();
             }
-        } catch (Exception ignore) { }
+        });
     }
 
-    private void parseJson(ArrayList<RepoRecord> records, JsonElement root) {
-        JsonArray list = root.getAsJsonArray();
-        for (int i = 0; i < list.size(); i++) {
-            JsonObject rec = list.get(i).getAsJsonObject();
-            long id = rec.get("id").getAsLong();
-            JsonElement cur=rec.get("name");
-            String name = cur.isJsonNull()?"":cur.getAsString();
-            JsonObject owner = rec.get("owner").getAsJsonObject();
-            cur=owner.get("login");
-            String owner_name = cur.isJsonNull()?"":cur.getAsString();
-            cur=owner.get("avatar_url");
-            String avatar = cur.isJsonNull()?"":cur.getAsString();
-            cur=rec.get("description");
-            String description = cur.isJsonNull()?"":cur.getAsString();
+    public List<RepoRecord> getSortedList() {
+        Collections.sort(data,
+                (first, second) ->
+                        first.getName().compareToIgnoreCase(second.getName()));
+        return data;
+    }
 
-            records.add(new RepoRecord(id,name,owner_name,description,avatar));
-        }
-    }
-    public List<RepoRecord> getNextList()
-    {
-        load();
-        return data;
-    }
-    public List<RepoRecord> getSortedList()
-    {
-        Collections.sort(data);
-        return data;
+    public interface OnLoadListener {
+        void onLoad(List<RepoRecord> list);
     }
 }

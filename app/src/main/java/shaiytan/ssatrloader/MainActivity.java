@@ -7,7 +7,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.*;
 
-public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
+public class MainActivity
+        extends AppCompatActivity
+        implements AdapterView.OnItemClickListener {
     private ListView reposlist;
     private ReposModel model;
     private Button sortbtn;
@@ -19,7 +21,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         setContentView(R.layout.activity_main);
         model = new ReposModel();
         reposlist = findViewById(R.id.reposlist);
-        reposlist.setAdapter(new ReposAdapter(this, model.getNextList()));
+        model.getNextList(list -> reposlist.setAdapter(new ReposAdapter(this, list)));
         reposlist.setOnItemClickListener(this);
         sortbtn = findViewById(R.id.sortclick);
         sortbtn.setOnClickListener(this::sortClick);
@@ -36,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     }
 
     public void loadMoreClick(View view) {
-        reposlist.setAdapter(new ReposAdapter(this, model.getNextList()));
+        model.getNextList(list -> reposlist.setAdapter(new ReposAdapter(this, list)));
         sortbtn.setVisibility(View.VISIBLE);
     }
 

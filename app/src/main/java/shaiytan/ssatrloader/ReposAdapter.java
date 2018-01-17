@@ -42,12 +42,10 @@ public class ReposAdapter extends BaseAdapter
             LayoutInflater inflater = context.getLayoutInflater();
             itemView=inflater.inflate(R.layout.list_item,null,true);
         }
-        ImageView ava = (ImageView) itemView.findViewById(R.id.avatar);
-        TextView name = (TextView) itemView.findViewById(R.id.name);
-        TextView owner = (TextView) itemView.findViewById(R.id.owner);
+        TextView name = itemView.findViewById(R.id.name);
+        TextView owner = itemView.findViewById(R.id.owner);
         name.setText(data.get(position).getName());
         owner.setText("Owner: "+data.get(position).getOwnerName());
-        ava.setImageResource(R.mipmap.ic_launcher);
         return itemView;
     }
 }
